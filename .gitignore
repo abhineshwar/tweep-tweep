@@ -1,4 +1,8 @@
+#python project compiled or other similar files
 *.py[cod]
+
+#editor files
+*~
 
 # C extensions
 *.so
