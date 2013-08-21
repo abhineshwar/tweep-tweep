@@ -1,0 +1,88 @@
++++Re-read streaming API request parameters for this point and another holistic view.
+
+IMPORTANT MESSAGES:
+ - Embeded objects might be inaccurate: Always go to the primary source for a definitive answer about something. e.g.  Information about tweets should come from methods 	in the statuses namespace. Information about users from the users namespace. Information about following relationships in the friends/followings/followers/
+	friendships namespaces and so on. 
+
+
+Processing streaming twitter data:
+
+1. Use stall_warning if client is lagging behind in the collection of tweets and to receive warning about possible disconnect.
+
+2. JSON encoded objects are unordered. JSON parser should tolerate unexpected or missing fields.
+
+3. Sometimes an incomplete Tweet field can be delivered. If this is the case then all the numerical values in the returned data will be set to -1. Check for it and use REST API to fetch the data as required.
+
+4. Use delimited messages to efficeintly copy chunks of text from the twitter stream. It is definitel better than to parse the message text for \r\n tokens.
+
+5. Twitter streaming volume is not constant. For clients to be able to keep their connection healthy and running with streaming API, they should take care of the increase and decrease in the twitter data over the course of national/internationals events and festivals. FOR TWEEP AS THE ELECTIONS COME CLOSER THIS SHOULD BE A PRIORITY.
+
+The best practice for ingesting Tweets and other streaming messages is to decouple collection and processing of high volume streams. For example, collect the raw text of messages in one process, passing each message into a message queue, rotated flatfile, or database. A second process or set of processes should parse the messages and extract any necessary fields for storage or further manipulation.
+
+6. Messages from the streaming API are not deliveres in a sorted order. A totally ordered timeline (assumption: this order has been forced by the user at the client end receiving twitter stream) display may cause a user to miss some messages as out of order messages are inserted further down the timeline. Consider sorting a timeline only when out of focus and appending to the top when in focus.
+
+Delete messages  may be delivered before the original tweet so implementations should be able to replay a local cache of unrecognized deletes.
+
+7. Duplicate messages maybe delivered so the clients should be tolerant of receiving a tweet more than once. This is most likely to occur when reconnecting to or backfilling from the Streaming API. Backfilling from the REST API will also tend to produce duplicates. Make sure to handle duplicate messages and use the since_id REST parameter to reduce duplication, latency and server-side load.
+
+8. Request gzipped stream. It can reduce the bandwidth needed to process a stream to as small as the 1/5th of the uncompressed stream. Sometimes twitter may not deliver a gzipped stream, even if one was request. Check the Content-Encoding header to verify that the stream is actually being compressed. 
+
+To make sure you get a compressed stream:
+
+- Make a HTTP 1.1 request.
+- Include a User-Agent header. Any value should be fine.
+- Include a valid Host header.
+- Do not send a "Connection: close" header.
+
+
+
+Twitter plateform objects:
+
+1. Tweets
+- New fields can be added to tweets and variation in the order of fields is also possible for any tweet. Not all fields appear in all contexts. Sometimes some fields 	   can be nulled field, empty set and the absence of a field as the same thing.
+- Fields:
+	- Tweet entities: These are the structured fields which come pre-parsed with the tweet. e.g. media, urls, user_mentions and most importantly hashtags.
+	- user: The user who posted this Tweet. Perspectival attributes embedded within this object are unreliable. 
+	- coordinates: The longitude and latitude of the user's location as an in the form of [longitude, latitude]
+	- withheld_in_countries: Presents a list of two letter country codes this content is withheld from. Two non-country values are supported for this field:
+		- "XX" - content is withheld in all countries
+		- "XY" - content is withheld due to a DMCA request.
+
+
+
+2. Users
+- Same caveats apply as the tweets.
+- Contains multiple fields. most important of those are described below:
+	- Entities (i.e. User Entities): This contains the entities which have been parsed out of the url or description fields defined by the user, i.e. contains 			further information about the user by extracting the information from url (possibly connecting) and description field.
+	- id: Integer representation of the unique identifier for the user. This number is greater than 53 bits and some programming languages might have problem 		interpreting this integer. Use a signed64 bit integer to store this identifier. Use id_str for fetching the identifier to stay on the safe side.
+	- id_str: The string representation of the integer in the "id" identifier field. It is recommended to use this to avoid troubles with the consumption of the 		possibly very long integer in "id".
+
+3. Entities
+- Tweet entities: described in detail before
+- Entities for user objects
+- Entities for retweets
+ 
+4. Places
+ - Places are specifc named locations with corresponding geo coordinates. Places can be name searched. Places mentioned in a tweet does not necessarily means that the 	   tweet is from that place. It can also mean that the tweet is about that place.
+- Bounding Box: Each set of coordinates is specified as [longitude, latitude].
+
+
+
+Streaming message types:
+
+In addition to the stsndard twitter payloads described above, following kind of messages may also be delivered on the stream. On top of these message types some other might also be introduced. Hence client parser should be tolerant of unexpected message formats:
+- Public stream messages:
+	- Blank lines: to keep the client alive
+	- status deletion notices (delete) (What about user deletion notices???)
+	- location deletion notices (scrub_geo)
+	- limit notices (limit): This is delivered when a filtered stream has matched more tweets than its current rate limit allows to be delivered. These contain a 			total count of undelivered tweets since the connection was opened.
+	- Disconnect messages (disconnect): API will try to deliver this message if the connection is closed. If the disconnect was due to network issues or the client 		reading too slowly, the message may not be delivered.
+	- Stall warnings (warning)
+	
+- User stream messages 
+	 NOT DOCUMENTED
+- Site stream messages
+	NOT DOCUMENTED
+
+
+
