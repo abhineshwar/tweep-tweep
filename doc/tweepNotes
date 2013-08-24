@@ -1,8 +1,22 @@
+Stream: https://stream.twitter.com/1.1/statuses/filter.json
+
 +++Re-read streaming API request parameters for this point and another holistic view.
 
 IMPORTANT MESSAGES:
- - Embeded objects might be inaccurate: Always go to the primary source for a definitive answer about something. e.g.  Information about tweets should come from methods 	in the statuses namespace. Information about users from the users namespace. Information about following relationships in the friends/followings/followers/
+- Embeded objects might be inaccurate: Always go to the primary source for a definitive answer about something. e.g.  Information about tweets should come from methods 	in the statuses namespace. Information about users from the users namespace. Information about following relationships in the friends/followings/followers/
 	friendships namespaces and so on. 
+- Filter out the noise i.e unexpected streaming message types before consuming the collected data.
+
+Authentication model:
+- Application-User authentication
+	Application makes request using its application key and a secret key on behalf of a user with its credentials.
+- Apllication-only authentication
+	Application makes requests on its behalf without the need of any user credentials.
+- These two models might have different rate limits for the same method if the method permits both kinds of authentication.
+- More info on OAuth model: http://hueniverse.com/oauth/guide/intro/
+- 
+
+
 
 
 Processing streaming twitter data:
