@@ -1,31 +1,32 @@
-#-------------------------------------------------------------------------------
-# Name:        module1
-# Purpose:
-#
-# Author:      aditya
-#
-# Created:     21/08/2013
-# Copyright:   (c) aditya 2013
-# Licence:     <your licence>
-#-------------------------------------------------------------------------------
-
-##def main():
-##    pass
-##
-##if __name__ == '__main__':
-##    main()
+"""
+<PLease enter module docstring here>
+Created on 21/08/2013
+@author: Aditya Tewari, Abhineshwar Tomar
+@version: <version number>
+@copyright: Aditya Tewari, Abhineshwar Tomar
+@license: <license>
+"""
 
 from twython import Twython
 from twython import TwythonStreamer
 
 class MyStreamer(TwythonStreamer):
+    """
+    <Class docstring>
+    """
     def on_success(self,status):
-       with open('workfiles.txt', 'a') as f:
-        f.write(status['user']['name']+ ' ' +( status['created_at']+ ' '+ status['text'] ))
-        f.write('\n')
-       print (status)
+        """
+        <Docsting for method>
+        """
+        with open('workfiles.txt', 'a') as f:
+            f.write(status['user']['name']+ ' ' +( status['created_at']+ ' '+ status['text'] ))
+            f.write('\n')
+            print (status)
 
     def on_error(self, status_code,resp):
+        """
+        <Docstring for method>
+        """
         print resp
 
 APP_KEY = 'gRFoHczqjlVC352V9EIg'
@@ -35,4 +36,3 @@ TOK_SEC = 'gMMktKJHz1q9miKmuWQKDIYfMJVQahUR0Xd40wGtw'
 
 stream = MyStreamer(APP_KEY,APP_SECRET,TOK,TOK_SEC)
 stream.statuses.filter(track='modi , raga', language='en')
-

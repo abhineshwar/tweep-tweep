@@ -13,8 +13,10 @@ Authentication model:
 - Apllication-only authentication
 	Application makes requests on its behalf without the need of any user credentials.
 - These two models might have different rate limits for the same method if the method permits both kinds of authentication.
-- More info on OAuth model: http://hueniverse.com/oauth/guide/intro/
+
 - 
+
+- More info on OAuth: http://hueniverse.com/oauth/guide/intro/
 
 
 
